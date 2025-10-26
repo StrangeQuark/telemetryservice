@@ -1,0 +1,69 @@
+services:
+  telemetry-service:
+    build: .
+    networks:
+      - shared-network
+      - telemetrydb-network
+    container_name: telemetry-service
+    depends_on:
+      - telemetry-db
+      - telemetry-kafka
+    environment:
+      - SPRING_APPLICATION_NAME=${SPRING_APPLICATION_NAME}
+      - SERVER_PORT=${SERVER_PORT}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      - SPRING_DATA_MONGODB_HOST=telemetry-db
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=telemetryservice
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=${SPRING_KAFKA_CONSUMER_GROUP_ID}
+      - SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET=${SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET}
+      - SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER=${SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER}
+      - SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER=${SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER}
+      - SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_DESERIALIZER_VALUE_DELEGATE_CLASS=${SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_DESERIALIZER_VALUE_DELEGATE_CLASS}
+      - SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_JSON_TRUSTED_PACKAGES=${SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_JSON_TRUSTED_PACKAGES}
+      - SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_JSON_VALUE_DEFAULT_TYPE=${SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_JSON_VALUE_DEFAULT_TYPE}
+    ports:
+      - "6050:6050"
+
+  telemetry-db:
+    image: 'mongo:6.0'
+    container_name: telemetry-db
+    ports:
+      - "27017:27017"
+    networks:
+      - telemetrydb-network
+
+  zookeeper:
+    image: 'confluentinc/cp-zookeeper:7.6.0'
+    container_name: zookeeper
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=${ZOOKEEPER_CLIENT_PORT}
+      - ZOOKEEPER_TICK_TIME=${ZOOKEEPER_TICK_TIME}
+    networks:
+      - shared-network
+    ports:
+      - "2182:2182"
+
+  telemetry-kafka:
+    image: 'confluentinc/cp-kafka:7.6.0'
+    container_name: telemetry-kafka
+    depends_on:
+      - zookeeper
+    networks:
+      - shared-network
+    ports:
+      - "9093:9093"
+    environment:
+      - KAFKA_BROKER_ID=${KAFKA_BROKER_ID}
+      - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT}
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP}
+      - KAFKA_LISTENERS=${KAFKA_LISTENERS}
+      - KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}
+
+networks:
+  shared-network:
+    external: true
+  telemetrydb-network:
+    external: true
