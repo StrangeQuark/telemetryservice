@@ -1,5 +1,6 @@
 package com.strangequark.telemetryservice.event;
 
+import com.strangequark.telemetryservice.utility.JwtUtility; // Integration line: Auth
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
@@ -27,6 +28,10 @@ public class TelemetryEventListener {
 
     @Autowired
     TelemetryEventRepository telemetryEventRepository;
+    // Integration function start: Auth
+    @Autowired
+    JwtUtility jwtUtility;
+    // Integration function end: Auth
 
     @Bean
     public Collection<NewTopic> kafkaTopics() {
@@ -52,59 +57,89 @@ public class TelemetryEventListener {
     @KafkaListener(topics = "general-telemetry-events", groupId = "telemetry-group")
     public void generalTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("General telemetry event received");
-        TelemetryEvent telemetryEvent = record.value();
-        setAuthHeaderFromKafkaConsumerRecord(record); // Integration line: Auth
+        // Integration function start: Auth
+        setAuthHeaderFromKafkaConsumerRecord(record);
+        if(!jwtUtility.validateToken()) {
+            LOGGER.error("Invalid JWT token - general telemetry event skipped");
+            return;
+        }
+        // Integration function end: Auth
 
-        telemetryEventRepository.save(telemetryEvent);
+        telemetryEventRepository.save(record.value());
     }
     // Integration function start: Auth
     @KafkaListener(topics = "auth-telemetry-events", groupId = "telemetry-group")
     public void authTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("Auth telemetry event received");
-        TelemetryEvent telemetryEvent = record.value();
-        setAuthHeaderFromKafkaConsumerRecord(record); // Integration line: Auth
+        // Integration function start: Auth
+        setAuthHeaderFromKafkaConsumerRecord(record);
+        if(!jwtUtility.validateToken()) {
+            LOGGER.error("Invalid JWT token - auth telemetry event skipped");
+            return;
+        }
+        // Integration function end: Auth
 
-        telemetryEventRepository.save(telemetryEvent);
+        telemetryEventRepository.save(record.value());
     }
     // Integration function end: Auth
     // Integration function start: Email
     @KafkaListener(topics = "email-telemetry-events", groupId = "telemetry-group")
     public void emailTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("Email telemetry event received");
-        TelemetryEvent telemetryEvent = record.value();
-        setAuthHeaderFromKafkaConsumerRecord(record); // Integration line: Auth
+        // Integration function start: Auth
+        setAuthHeaderFromKafkaConsumerRecord(record);
+        if(!jwtUtility.validateToken()) {
+            LOGGER.error("Invalid JWT token - email telemetry event skipped");
+            return;
+        }
+        // Integration function end: Auth
 
-        telemetryEventRepository.save(telemetryEvent);
+        telemetryEventRepository.save(record.value());
     }
     // Integration function end: Email
     // Integration function start: File
     @KafkaListener(topics = "file-telemetry-events", groupId = "telemetry-group")
     public void fileTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("File telemetry event received");
-        TelemetryEvent telemetryEvent = record.value();
-        setAuthHeaderFromKafkaConsumerRecord(record); // Integration line: Auth
+        // Integration function start: Auth
+        setAuthHeaderFromKafkaConsumerRecord(record);
+        if(!jwtUtility.validateToken()) {
+            LOGGER.error("Invalid JWT token - file telemetry event skipped");
+            return;
+        }
+        // Integration function end: Auth
 
-        telemetryEventRepository.save(telemetryEvent);
+        telemetryEventRepository.save(record.value());
     }
     // Integration function end: File
     // Integration function start: Vault
     @KafkaListener(topics = "vault-telemetry-events", groupId = "telemetry-group")
     public void vaultTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("Vault telemetry event received");
-        TelemetryEvent telemetryEvent = record.value();
-        setAuthHeaderFromKafkaConsumerRecord(record); // Integration line: Auth
+        // Integration function start: Auth
+        setAuthHeaderFromKafkaConsumerRecord(record);
+        if(!jwtUtility.validateToken()) {
+            LOGGER.error("Invalid JWT token - vault telemetry event skipped");
+            return;
+        }
+        // Integration function end: Auth
 
-        telemetryEventRepository.save(telemetryEvent);
+        telemetryEventRepository.save(record.value());
     }
     // Integration function end: Vault
     // Integration function start: React
     @KafkaListener(topics = "react-telemetry-events", groupId = "telemetry-group")
     public void reactTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("React telemetry event received");
-        TelemetryEvent telemetryEvent = record.value();
-        setAuthHeaderFromKafkaConsumerRecord(record); // Integration line: Auth
+        // Integration function start: Auth
+        setAuthHeaderFromKafkaConsumerRecord(record);
+        if(!jwtUtility.validateToken()) {
+            LOGGER.error("Invalid JWT token - react telemetry event skipped");
+            return;
+        }
+        // Integration function end: Auth
 
-        telemetryEventRepository.save(telemetryEvent);
+        telemetryEventRepository.save(record.value());
     }
     // Integration function end: React
     // Integration function start: Auth
