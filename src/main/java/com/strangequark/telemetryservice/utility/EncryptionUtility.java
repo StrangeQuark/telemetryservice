@@ -25,6 +25,7 @@ public class EncryptionUtility {
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionUtility.class);
     private static final String ALGORITHM = "AES";
     private static final String ENCRYPTION_KEY = resolveKey();
+    private static final boolean ENCRYPT_DATA_AT_REST = resolveEncryptionEnabled();
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,7 +46,29 @@ public class EncryptionUtility {
         return key;
     }
 
+    private static boolean resolveEncryptionEnabled() {
+        LOGGER.info("Attempting to resolve ENCRYPT_DATA_AT_REST env var");
+
+        String flag = System.getProperty("ENCRYPT_DATA_AT_REST");
+        if (flag == null) {
+            LOGGER.info("Unable to grab from properties, attempt with environment variables");
+            flag = System.getenv("ENCRYPT_DATA_AT_REST");
+        }
+        if(flag == null) {
+            LOGGER.info("ENCRYPT_DATA_AT_REST is not set, defaulting to TRUE");
+            flag = "true";
+        }
+
+        boolean enabled = Boolean.parseBoolean(flag);
+        LOGGER.info("Data-at-rest encryption is " +  (enabled ? "ENABLED" : "DISABLED"));
+
+        return enabled;
+    }
+
     public static String encrypt(String raw) {
+        if (!ENCRYPT_DATA_AT_REST)
+            return raw;
+
         try {
             SecretKey key = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), ALGORITHM);
 
@@ -59,6 +82,9 @@ public class EncryptionUtility {
     }
 
     public static String decrypt(String encrypted) {
+        if (!ENCRYPT_DATA_AT_REST)
+            return encrypted;
+
         try {
             SecretKey key = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), ALGORITHM);
 
