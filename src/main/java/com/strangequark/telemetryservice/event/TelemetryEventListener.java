@@ -3,7 +3,7 @@ package com.strangequark.telemetryservice.event;
 import com.strangequark.telemetryservice.utility.JwtUtility; // Integration line: Auth
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Header; // Integration line: Auth
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +13,11 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletRequest; // Integration line: Auth
 import org.springframework.stereotype.Service;
 import org.springframework.util.backoff.FixedBackOff;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder; // Integration line: Auth
+import org.springframework.web.context.request.ServletRequestAttributes; // Integration line: Auth
 
 import java.util.Collection;
 import java.util.List;
@@ -71,13 +71,11 @@ public class TelemetryEventListener {
     @KafkaListener(topics = "auth-telemetry-events", groupId = "telemetry-group")
     public void authTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("Auth telemetry event received");
-        // Integration function start: Auth
         setAuthHeaderFromKafkaConsumerRecord(record);
         if(!jwtUtility.validateToken()) {
             LOGGER.error("Invalid JWT token - auth telemetry event skipped");
             return;
         }
-        // Integration function end: Auth
 
         telemetryEventRepository.save(record.value());
     }
