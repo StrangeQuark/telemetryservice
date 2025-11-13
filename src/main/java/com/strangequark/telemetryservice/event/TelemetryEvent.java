@@ -1,10 +1,12 @@
 package com.strangequark.telemetryservice.event;
 
+import com.strangequark.telemetryservice.utility.EncryptionUtility;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -91,10 +93,28 @@ public class TelemetryEvent {
     }
 
     public Map<String, Object> getMetadata() {
-        return metadata;
+        if (metadata == null)
+            return null;
+
+        Map<String, Object> decrypted = new HashMap<>();
+        for (var entry : metadata.entrySet()) {
+            decrypted.put(EncryptionUtility.decrypt(entry.getKey()), EncryptionUtility.decrypt(entry.getValue().toString()));
+        }
+
+        return decrypted;
     }
 
     public void setMetadata(Map<String, Object> metadata) {
-        this.metadata = metadata;
+        if (metadata == null) {
+            this.metadata = null;
+            return;
+        }
+
+        Map<String, Object> encrypted = new HashMap<>();
+        for (var entry : metadata.entrySet()) {
+            encrypted.put(EncryptionUtility.encrypt(entry.getKey()), EncryptionUtility.encrypt(entry.getValue().toString()));
+        }
+
+        this.metadata = encrypted;
     }
 }

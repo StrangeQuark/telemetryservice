@@ -1,23 +1,14 @@
 package com.strangequark.telemetryservice.utility;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.data.convert.ReadingConverter;
-import org.springframework.data.convert.WritingConverter;
-import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.List;
-import java.util.Map;
 
 @Configuration
 public class EncryptionUtility {
@@ -25,7 +16,6 @@ public class EncryptionUtility {
     private static final String ALGORITHM = "AES";
     private static final String ENCRYPTION_KEY = resolveKey();
     private static final boolean ENCRYPT_DATA_AT_REST = resolveEncryptionEnabled();
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static String resolveKey() {
@@ -93,42 +83,6 @@ public class EncryptionUtility {
             return new String(cipher.doFinal(Base64.getDecoder().decode(encrypted)));
         } catch (Exception e) {
             throw new RuntimeException("Decryption error", e);
-        }
-    }
-
-    @Bean
-    public MongoCustomConversions mongoCustomConversions() {
-        return new MongoCustomConversions(List.of(
-                new MapWriter(),
-                new MapReader()
-        ));
-    }
-
-    @WritingConverter
-    public static class MapWriter implements Converter<Map<String, Object>, String> {
-        @Override
-        public String convert(Map<String, Object> source) {
-            if (source == null) return null;
-            try {
-                String json = objectMapper.writeValueAsString(source);
-                return EncryptionUtility.encrypt(json);
-            } catch (Exception e) {
-                throw new RuntimeException("Error encrypting metadata map", e);
-            }
-        }
-    }
-
-    @ReadingConverter
-    public static class MapReader implements Converter<String, Map<String, Object>> {
-        @Override
-        public Map<String, Object> convert(String source) {
-            if (source == null) return null;
-            try {
-                String decrypted = EncryptionUtility.decrypt(source);
-                return objectMapper.readValue(decrypted, new TypeReference<Map<String, Object>>() {});
-            } catch (Exception e) {
-                throw new RuntimeException("Error decrypting metadata map", e);
-            }
         }
     }
 }
