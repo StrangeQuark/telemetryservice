@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -100,48 +99,9 @@ public class EncryptionUtility {
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
         return new MongoCustomConversions(List.of(
-                new StringWriter(),
-                new StringReader(),
-                new LocalDateTimeWriter(),
-                new LocalDateTimeReader(),
                 new MapWriter(),
                 new MapReader()
         ));
-    }
-
-    @WritingConverter
-    public static class StringWriter implements Converter<String, String> {
-        @Override
-        public String convert(String source) {
-            return EncryptionUtility.encrypt(source);
-        }
-    }
-
-    @ReadingConverter
-    public static class StringReader implements Converter<String, String> {
-        @Override
-        public String convert(String source) {
-            return EncryptionUtility.decrypt(source);
-        }
-    }
-
-    @WritingConverter
-    public static class LocalDateTimeWriter implements Converter<LocalDateTime, String> {
-        @Override
-        public String convert(LocalDateTime source) {
-            if (source == null) return null;
-            return EncryptionUtility.encrypt(source.format(FORMATTER));
-        }
-    }
-
-    @ReadingConverter
-    public static class LocalDateTimeReader implements Converter<String, LocalDateTime> {
-        @Override
-        public LocalDateTime convert(String source) {
-            if (source == null) return null;
-            String decrypted = EncryptionUtility.decrypt(source);
-            return LocalDateTime.parse(decrypted, FORMATTER);
-        }
     }
 
     @WritingConverter
