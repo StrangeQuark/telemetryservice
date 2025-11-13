@@ -98,7 +98,7 @@ public class TelemetryEvent {
 
         Map<String, Object> decrypted = new HashMap<>();
         for (var entry : metadata.entrySet()) {
-            decrypted.put(entry.getKey(), EncryptionUtility.decrypt(entry.getValue().toString()));
+            decrypted.put(EncryptionUtility.decrypt(entry.getKey()), EncryptionUtility.decrypt(entry.getValue().toString()));
         }
 
         return decrypted;
@@ -112,7 +112,7 @@ public class TelemetryEvent {
 
         Map<String, Object> encrypted = new HashMap<>();
         for (var entry : metadata.entrySet()) {
-            encrypted.put(entry.getKey(), EncryptionUtility.encrypt(entry.getValue().toString()));
+            encrypted.put(EncryptionUtility.encrypt(entry.getKey()), EncryptionUtility.encrypt(entry.getValue().toString()));
         }
 
         this.metadata = encrypted;
