@@ -14,14 +14,24 @@ public class TelemetryService {
     @Autowired
     TelemetryEventRepositoryImpl telemetryEventRepository;
 
-    public ResponseEntity<?> getEvents(String eventType, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        if (startDateTime == null)
+    public ResponseEntity<?> getEvents(String eventType, String numberOfEvents, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if(startDateTime == null)
             startDateTime = LocalDateTime.now().minusDays(7);
-        if (endDateTime == null)
+        if(endDateTime == null)
             endDateTime = LocalDateTime.now();
 
-        List<TelemetryEvent> events = telemetryEventRepository.getEventsByEventType(eventType, startDateTime, endDateTime);
+        List<TelemetryEvent> events = telemetryEventRepository.getEventsByEventType(eventType, numberOfEvents, startDateTime, endDateTime);
 
         return ResponseEntity.ok(events);
+    }
+
+    public ResponseEntity<?> countEvents(String serviceName, String eventType, String interval,
+                                         LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if(startDateTime == null)
+            startDateTime = LocalDateTime.now().minusDays(7);
+        if(endDateTime == null)
+            endDateTime = LocalDateTime.now();
+
+        return ResponseEntity.ok(telemetryEventRepository.countEvents(serviceName, eventType, interval, startDateTime, endDateTime));
     }
 }

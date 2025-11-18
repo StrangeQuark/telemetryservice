@@ -19,9 +19,21 @@ public class TelemetryController {
     @GetMapping("/get-events")
     public ResponseEntity<?> getEvents(
             @RequestParam String eventType,
+            @RequestParam(required = false) String numberOfEvents,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime) {
 
-        return telemetryService.getEvents(eventType, startDateTime, endDateTime);
+        return telemetryService.getEvents(eventType, numberOfEvents, startDateTime, endDateTime);
+    }
+
+    @GetMapping("/count-events")
+    public ResponseEntity<?> countEvents(
+            @RequestParam(required = false) String serviceName,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) String interval,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime) {
+
+        return telemetryService.countEvents(serviceName, eventType, interval, startDateTime, endDateTime);
     }
 }
