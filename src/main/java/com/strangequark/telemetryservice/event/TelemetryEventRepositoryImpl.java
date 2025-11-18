@@ -1,8 +1,6 @@
 package com.strangequark.telemetryservice.event;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -17,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 public class TelemetryEventRepositoryImpl implements TelemetryEventRepositoryWrapper {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryEventRepositoryImpl.class);
     @Autowired
     private MongoTemplate mongoTemplate;
 
