@@ -1,6 +1,5 @@
 package com.strangequark.telemetryservice.utility;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +15,6 @@ public class EncryptionUtility {
     private static final String ALGORITHM = "AES";
     private static final String ENCRYPTION_KEY = resolveKey();
     private static final boolean ENCRYPT_DATA_AT_REST = resolveEncryptionEnabled();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static String resolveKey() {
         LOGGER.info("Attempting to resolve encryption key");
