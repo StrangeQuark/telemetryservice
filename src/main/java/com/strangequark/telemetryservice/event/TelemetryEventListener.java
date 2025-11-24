@@ -142,7 +142,7 @@ public class TelemetryEventListener {
     // Integration function end: React
     // Integration function start: Auth
     public void setAuthHeaderFromKafkaConsumerRecord(ConsumerRecord<String, TelemetryEvent> record) {
-        LOGGER.info("Setting authorization header from Kafka consumer record");
+        LOGGER.debug("Setting authorization header from Kafka consumer record");
 
         // Extract JWT from Kafka header
         Header authHeader = record.headers().lastHeader("Authorization");
@@ -159,6 +159,6 @@ public class TelemetryEventListener {
         // Bind the mock request to the current thread
         ServletRequestAttributes attrs = new ServletRequestAttributes(mockRequest);
         RequestContextHolder.setRequestAttributes(attrs);
-        LOGGER.info("Kafka consumer auth header set");
+        LOGGER.debug("Kafka consumer auth header set");
     } // Integration function end: Auth
 }
