@@ -21,7 +21,7 @@ public class EncryptionUtility {
 
         String key = System.getProperty("ENCRYPTION_KEY");
         if (key == null) {
-            LOGGER.info("Unable to grab from properties, attempt with environment variables");
+            LOGGER.warn("Unable to grab from properties, attempt with environment variables");
             key = System.getenv("ENCRYPTION_KEY");
         }
         if (key == null || key.length() != 32) {
@@ -38,7 +38,7 @@ public class EncryptionUtility {
 
         String flag = System.getProperty("ENCRYPT_DATA_AT_REST");
         if (flag == null) {
-            LOGGER.info("Unable to grab from properties, attempt with environment variables");
+            LOGGER.warn("Unable to grab from properties, attempt with environment variables");
             flag = System.getenv("ENCRYPT_DATA_AT_REST");
         }
         if(flag == null) {
