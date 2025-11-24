@@ -1,12 +1,11 @@
 # Telemetryservice
-**Telemetryservice** is a secure microservice for processing analytics.<br><br>
-It uses AES encryption to protect all data at rest.
+**Telemetryservice** is a secure microservice for processing analytics.
 <br><br><br>
 
 ## Features
 - Analytics engine for ingesting and processing telemetry data
 - Supports synchronous API calls and asynchronous capabilities via Apache Kafka
-- AES-256 encryption for all telemetry objects
+- Optional AES-256 encryption for all telemetry metadata
 - Optional JWT-based user authentication via external Authservice
 - Ready-to-run Docker environment
 - Postman collection for testing and exploration
@@ -48,7 +47,7 @@ The `.env` file is required to provide necessary configuration such as encryptio
 A Postman collection is included in the root of the project:
 
 - `Telemetryservice.postman_collection.json`
-<br><br>
+  <br><br>
 
 ## Testing
 Unit tests are provided for all repository and service-layer logic.
@@ -65,13 +64,13 @@ This project includes a `Jenkinsfile` for use in CI/CD pipelines. Jenkins must b
 ## Optional: MSINIT Integration
 Telemetryservice can integrate with all other microservice within the MSINIT project.
 
-For more information, see the following repositories: 
+For more information, see the following repositories:
 - [Authservice GitHub Repository](https://github.com/StrangeQuark/authservice)
 - [Emailservice GitHub Repository](https://github.com/StrangeQuark/emailservice)
 - [Fileservice GitHub Repository](https://github.com/StrangeQuark/fileservice)
 - [Vaultservice GitHub Repository](https://github.com/StrangeQuark/vaultservice)
 - [Reactservice GitHub Repository](https://github.com/StrangeQuark/reactservice)
-<br><br>
+  <br><br>
 
 ## License
 This project is licensed under the GNU General Public License. See `LICENSE.md` for details.
