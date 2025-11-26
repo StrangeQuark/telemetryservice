@@ -1,12 +1,10 @@
 package com.strangequark.telemetryservice.telemetry;
 
+import com.strangequark.telemetryservice.event.TelemetryEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +13,11 @@ import java.time.LocalDateTime;
 public class TelemetryController {
     @Autowired
     TelemetryService telemetryService;
+
+    @PostMapping("/create-event")
+    public ResponseEntity<?> createEvent(@RequestBody TelemetryEvent telemetryEvent) {
+        return telemetryService.createEvent(telemetryEvent);
+    }
 
     @GetMapping("/get-events")
     public ResponseEntity<?> getEvents(
