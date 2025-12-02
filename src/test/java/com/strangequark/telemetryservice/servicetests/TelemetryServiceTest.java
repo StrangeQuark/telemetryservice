@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @DataMongoTest
 @ActiveProfiles("test")
@@ -77,7 +78,9 @@ public class TelemetryServiceTest {
         ResponseEntity<?> response = telemetryService.countEvents(testServiceName, testEventType, null, null, null);
 
         Assertions.assertEquals(200, response.getStatusCode().value());
-        Assertions.assertEquals("{total=1}", response.getBody().toString());
+
+        Map<String, Integer> responseMap = (Map<String, Integer>) response.getBody();
+        Assertions.assertEquals(1, responseMap.get("total"));
     }
 }
 
