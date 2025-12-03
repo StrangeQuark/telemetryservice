@@ -3,6 +3,7 @@ package com.strangequark.telemetryservice.telemetry;
 import com.strangequark.telemetryservice.event.TelemetryEvent;
 import com.strangequark.telemetryservice.event.TelemetryEventRepository;
 import com.strangequark.telemetryservice.event.TelemetryEventRepositoryImpl;
+import com.strangequark.telemetryservice.utility.JwtUtility; // Integration line: Auth
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,13 @@ public class TelemetryService {
 
     @Autowired
     TelemetryEventRepository telemetryEventRepository;
+    @Autowired // Integration line: Auth
+    JwtUtility jwtUtility; // Integration line: Auth
 
     public ResponseEntity<?> createEvent(TelemetryEvent telemetryEvent) {
         try {
+            if(!jwtUtility.validateToken()) // Integration line: Auth
+                throw new RuntimeException("Requesting user does not have access"); // Integration line: Auth
             if(telemetryEvent.getServiceName() == null)
                 throw new RuntimeException("Service name must not be null");
 
@@ -44,6 +49,8 @@ public class TelemetryService {
     }
 
     public ResponseEntity<?> getEvents(String eventType, String numberOfEvents, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if(!jwtUtility.validateToken()) // Integration line: Auth
+            throw new RuntimeException("Requesting user does not have access"); // Integration line: Auth
         if(startDateTime == null)
             startDateTime = LocalDateTime.now().minusDays(7);
         if(endDateTime == null)
@@ -56,6 +63,8 @@ public class TelemetryService {
 
     public ResponseEntity<?> countEvents(String serviceName, String eventType, String interval,
                                          LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if(!jwtUtility.validateToken()) // Integration line: Auth
+            throw new RuntimeException("Requesting user does not have access"); // Integration line: Auth
         if(startDateTime == null)
             startDateTime = LocalDateTime.now().minusDays(7);
         if(endDateTime == null)
