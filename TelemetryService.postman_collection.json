@@ -30,11 +30,21 @@
 		{
 			"name": "Create event",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"serviceName\": \"test123\",\n    \"eventType\": \"test-type\",\n    \"timestamp\": \"2025-11-25T20:35:00.000000\",\n    \"metadata\": {\n        \"testKey\": \"testValue\"\n    }\n}",
+					"raw": "{\n    \"serviceName\": \"test123\",\n    \"eventType\": \"test-type\",\n    \"timestamp\": \"2025-12-02T00:00:00.000000\",\n    \"metadata\": {\n        \"testKey\": \"testValue\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -60,6 +70,16 @@
 		{
 			"name": "Get events",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -102,10 +122,20 @@
 		{
 			"name": "Count events",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:6050/api/telemetry/count-events?startDateTime=2025-11-13T02:08:41.862&endDateTime=2025-11-20T02:08:41.862&eventType=user-register&interval=minute&serviceName=authservice",
+					"raw": "http://localhost:6050/api/telemetry/count-events?eventType=test-type&interval=minute&serviceName=test123",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -119,15 +149,17 @@
 					"query": [
 						{
 							"key": "startDateTime",
-							"value": "2025-11-13T02:08:41.862"
+							"value": "2025-11-13T02:08:41.862",
+							"disabled": true
 						},
 						{
 							"key": "endDateTime",
-							"value": "2025-11-20T02:08:41.862"
+							"value": "2025-11-20T02:08:41.862",
+							"disabled": true
 						},
 						{
 							"key": "eventType",
-							"value": "user-register"
+							"value": "test-type"
 						},
 						{
 							"key": "interval",
@@ -135,7 +167,7 @@
 						},
 						{
 							"key": "serviceName",
-							"value": "authservice"
+							"value": "test123"
 						}
 					]
 				}
