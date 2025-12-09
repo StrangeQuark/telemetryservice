@@ -4,6 +4,8 @@ services:
     networks:
       - shared-network
       - telemetrydb-network
+    ports:
+      - "6050:6050"
     container_name: telemetry-service
     depends_on:
       - telemetry-db
@@ -27,8 +29,11 @@ services:
       - SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_JSON_VALUE_DEFAULT_TYPE=${SPRING_KAFKA_CONSUMER_PROPERTIES_SPRING_JSON_VALUE_DEFAULT_TYPE}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - ACCESS_SECRET_KEY=${ACCESS_SECRET_KEY} # Integration line: Auth
-    ports:
-      - "6050:6050"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:6050/api/telemetry/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   telemetry-db:
     image: 'mongo:6.0'
