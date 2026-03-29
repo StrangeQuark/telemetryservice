@@ -38,6 +38,9 @@ services:
   telemetry-db:
     image: 'mongo:6.0'
     container_name: telemetry-db
+    restart: unless-stopped
+    volumes:
+      - telemetry-db-volume:/var/lib/postgresql/data/telemetryservice
     ports:
       - "27017:27017"
     networks:
@@ -88,3 +91,6 @@ networks:
     external: true
   telemetrydb-network:
     external: true
+
+volumes:
+  telemetry-db-volume:
