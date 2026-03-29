@@ -40,7 +40,7 @@ services:
     container_name: telemetry-db
     restart: unless-stopped
     volumes:
-      - telemetry-db-volume:/var/lib/postgresql/data/telemetryservice
+      - telemetry-db-volume:/var/lib/postgresql/data
     ports:
       - "27017:27017"
     networks:
