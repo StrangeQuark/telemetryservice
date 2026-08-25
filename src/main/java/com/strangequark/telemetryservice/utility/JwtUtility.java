@@ -30,10 +30,15 @@ public class JwtUtility {
     private String JWT_ISSUER;
 
     public boolean validateToken() {
-        LOGGER.debug("Attempting to validate JWT");
+        LOGGER.debug("Attempting to validate JWT from request");
+
+        return validateToken(getTokenFromHeader());
+    }
+
+    public boolean validateToken(String token) {
+        LOGGER.debug("Attempting to validate provided JWT");
 
         try {
-            String token = getTokenFromHeader();
             Claims claims = getClaims(token);
             List<String> authorizations = claims.get("authorizations", List.class);
 
