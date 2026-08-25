@@ -30,7 +30,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/telemetry/health").permitAll()
-                        .requestMatchers("/api/**").authenticated() // Integration line: Auth
+                        .requestMatchers("/api/**").hasAuthority("TELEMETRY_API_ACCESS") // Integration line: Auth
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
