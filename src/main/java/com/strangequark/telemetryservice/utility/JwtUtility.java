@@ -56,6 +56,23 @@ public class JwtUtility {
         }
     }
 
+    public String getServiceName() {
+        return getServiceNameFromToken(getTokenFromHeader());
+    }
+
+    public String getServiceNameFromToken(String token) {
+        try {
+            Claims claims = getClaims(token);
+
+            if(!claims.get("principalType", String.class).equals("SERVICE_ACCOUNT"))
+                throw new RuntimeException("JWT is not a service account token");
+
+            return claims.getSubject();
+        } catch(Exception ex) {
+            throw new RuntimeException("Failed to get service name from JWT", ex);
+        }
+    }
+
     private String getTokenFromHeader() {
         LOGGER.debug("Attempting to get token from header");
         try {

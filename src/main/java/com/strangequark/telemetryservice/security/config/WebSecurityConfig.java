@@ -30,6 +30,10 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/telemetry/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/telemetry/create-event")
+                        .hasAuthority("TELEMETRY_API_ACCESS") // Integration line: Auth
+                        .requestMatchers(HttpMethod.GET, "/api/telemetry/get-events", "/api/telemetry/count-events")
+                        .hasAuthority("TELEMETRY_READ_ACCESS") // Integration line: Auth
                         .requestMatchers("/api/**").hasAuthority("TELEMETRY_API_ACCESS") // Integration line: Auth
                         .anyRequest().permitAll()
                 )
