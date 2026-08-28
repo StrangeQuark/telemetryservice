@@ -19,6 +19,7 @@ services:
       - SPRING_DATA_MONGODB_HOST=${SPRING_DATA_MONGODB_HOST}
       - SPRING_DATA_MONGODB_PORT=${SPRING_DATA_MONGODB_PORT}
       - SPRING_DATA_MONGODB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - SPRING_DATA_MONGODB_URI=mongodb://${MONGO_APP_USERNAME}:${MONGO_APP_PASSWORD}@telemetry-db:27017/${SPRING_DATA_MONGODB_DATABASE}?authSource=${SPRING_DATA_MONGODB_DATABASE}
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=${SPRING_KAFKA_BOOTSTRAP_SERVERS}
       - SPRING_KAFKA_CONSUMER_GROUP_ID=${SPRING_KAFKA_CONSUMER_GROUP_ID}
       - SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET=${SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET}
@@ -42,8 +43,13 @@ services:
     restart: unless-stopped
     volumes:
       - telemetry-db-volume:/data/db
-    ports:
-      - "27017:27017"
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${SPRING_DATA_MONGODB_DATABASE}
+      - MONGO_APP_USERNAME=${MONGO_APP_USERNAME}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
     networks:
       - telemetrydb-network
 
@@ -52,11 +58,16 @@ services:
     container_name: mongo-express
     restart: always
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     environment:
-      - ME_CONFIG_MONGODB_SERVER=${SPRING_DATA_MONGODB_HOST}
+      - ME_CONFIG_MONGODB_URL=mongodb://${MONGO_APP_USERNAME}:${MONGO_APP_PASSWORD}@telemetry-db:27017/${SPRING_DATA_MONGODB_DATABASE}?authSource=${SPRING_DATA_MONGODB_DATABASE}
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
+      - ME_CONFIG_BASICAUTH_ENABLED=true
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USERNAME}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD}
     networks:
       - telemetrydb-network
+      - shared-network
 
 
   telemetry-zookeeper:
@@ -67,8 +78,6 @@ services:
       - ZOOKEEPER_TICK_TIME=${ZOOKEEPER_TICK_TIME}
     networks:
       - shared-network
-    ports:
-      - "2182:2182"
 
   telemetry-kafka:
     image: 'confluentinc/cp-kafka:7.6.0'
@@ -77,8 +86,6 @@ services:
       - telemetry-zookeeper
     networks:
       - shared-network
-    ports:
-      - "9093:9093"
     environment:
       - KAFKA_BROKER_ID=${KAFKA_BROKER_ID}
       - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT}
@@ -91,7 +98,7 @@ networks:
   shared-network:
     external: true
   telemetrydb-network:
-    external: true
+    internal: true
 
 volumes:
   telemetry-db-volume:
