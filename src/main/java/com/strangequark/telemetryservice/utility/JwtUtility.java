@@ -30,10 +30,15 @@ public class JwtUtility {
     private String JWT_ISSUER;
 
     public boolean validateToken() {
-        LOGGER.debug("Attempting to validate JWT");
+        LOGGER.debug("Attempting to validate JWT from request");
+
+        return validateToken(getTokenFromHeader());
+    }
+
+    public boolean validateToken(String token) {
+        LOGGER.debug("Attempting to validate provided JWT");
 
         try {
-            String token = getTokenFromHeader();
             Claims claims = getClaims(token);
             List<String> authorizations = claims.get("authorizations", List.class);
 
@@ -48,6 +53,23 @@ public class JwtUtility {
             LOGGER.error("Failed to validate token: " + ex.getMessage());
             LOGGER.debug("Stack trace: ", ex);
             return false;
+        }
+    }
+
+    public String getServiceName() {
+        return getServiceNameFromToken(getTokenFromHeader());
+    }
+
+    public String getServiceNameFromToken(String token) {
+        try {
+            Claims claims = getClaims(token);
+
+            if(!claims.get("principalType", String.class).equals("SERVICE_ACCOUNT"))
+                throw new RuntimeException("JWT is not a service account token");
+
+            return claims.getSubject();
+        } catch(Exception ex) {
+            throw new RuntimeException("Failed to get service name from JWT", ex);
         }
     }
 
