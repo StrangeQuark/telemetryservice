@@ -7,6 +7,13 @@ services:
     ports:
       - "6050:6050"
     container_name: telemetry-service
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
     labels:
       com.msinit.log: "true"
       com.msinit.service-name: "telemetryservice"
@@ -42,7 +49,7 @@ services:
       retries: 20
 
   telemetry-db:
-    image: 'mongo:6.0'
+    image: 'mongo:6.0@sha256:8b6d8f5bbedb25cb73517b65cf99f13aeb75ad5b157a56c479287a840bbad3ac'
     container_name: telemetry-db
     restart: unless-stopped
     volumes:
@@ -58,7 +65,7 @@ services:
       - telemetrydb-network
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express@sha256:1b23d7976f0210dbec74045c209e52fbb26d29b2e873d6c6fa3d3f0ae32c2a64
     container_name: mongo-express
     restart: always
     ports:
@@ -75,7 +82,7 @@ services:
 
 
   telemetry-zookeeper:
-    image: 'confluentinc/cp-zookeeper:7.6.0'
+    image: 'confluentinc/cp-zookeeper:7.6.0@sha256:9babd1c0beaf93189982bdbb9fe4bf194a2730298b640c057817746c19838866'
     container_name: telemetry-zookeeper
     environment:
       - ZOOKEEPER_CLIENT_PORT=${ZOOKEEPER_CLIENT_PORT}
@@ -84,7 +91,7 @@ services:
       - shared-network
 
   telemetry-kafka:
-    image: 'confluentinc/cp-kafka:7.6.0'
+    image: 'confluentinc/cp-kafka:7.6.0@sha256:24cdd3a7fa89d2bed150560ebea81ff1943badfa61e51d66bb541a6b0d7fb047'
     container_name: telemetry-kafka
     depends_on:
       - telemetry-zookeeper
