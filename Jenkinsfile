@@ -12,22 +12,17 @@ pipeline {
             steps {
                 script {
                     def response = httpRequest(
-                        url: VAULT_URL + '/api/vault/cicd/telemetryservice/e3',
-                        httpMode: 'GET',
+                        url: VAULT_URL + '/api/vault/cicd',
+                        httpMode: 'POST',
+                        contentType: 'APPLICATION_JSON',
+                        requestBody: '{"serviceName":"telemetryservice","environmentName":"e3"}',
                         customHeaders: [
                             [name: 'X-CICD-TOKEN', value: CICD_TOKEN, maskValue: true]
                         ],
-                        acceptType: 'APPLICATION_JSON'
+                        validResponseCodes: '200'
                     )
 
-                    def json = readJSON text: response.content
-                    def envFileContent = ''
-
-                    json.each { entry ->
-                        envFileContent += "${entry.key}=${entry.value}\n"
-                    }
-
-                    writeFile file: 'telemetryservice.env', text: envFileContent
+                    writeFile file: 'telemetryservice.env', text: response.content
                     echo "Environment variables written to telemetryservice.env"
                 }
             }
