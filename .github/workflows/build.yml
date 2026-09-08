@@ -10,7 +10,7 @@ jobs:
 
     env:
       VAULT_URL: ${{ secrets.VAULT_URL }} # Integration line: Vault
-      CICD_TOKEN: ${{ secrets.CICD_TOKEN }} # Integration line: Vault
+      CICD_TOKEN: ${{ secrets.TELEMETRY_CICD_TOKEN }} # Integration line: Vault
 
     steps:
       - name: Checkout repository
