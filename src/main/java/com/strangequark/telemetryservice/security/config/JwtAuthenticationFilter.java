@@ -1,5 +1,3 @@
-// Integration file: Auth
-
 package com.strangequark.telemetryservice.security.config;
 
 import io.jsonwebtoken.Claims;

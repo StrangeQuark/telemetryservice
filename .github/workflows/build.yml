@@ -1,4 +1,3 @@
-# Integration file: GHA
 name: TelemetryService Deploy
 
 on:
@@ -9,36 +8,37 @@ jobs:
     runs-on: [self-hosted, linux-agent]
 
     env:
-      VAULT_URL: ${{ secrets.VAULT_URL }} # Integration line: Vault
-      CICD_TOKEN: ${{ secrets.TELEMETRY_CICD_TOKEN }} # Integration line: Vault
+      VAULT_URL: ${{ secrets.VAULT_URL }}
+      CICD_TOKEN: ${{ secrets.TELEMETRY_CICD_TOKEN }}
+      VAULTSERVICE_ENABLED: ${{ secrets.VAULTSERVICE_ENABLED }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        # Integration function start: Vault
       - name: Retrieve Env Vars from Vault
         run: |
-          echo "Requesting environment variables from Vault..."
+          if [ "$VAULTSERVICE_ENABLED" = "true" ]; then
+            echo "Requesting environment variables from Vault..."
 
-          response=$(curl -sS --fail-with-body \
-            -X POST \
-            -H "X-CICD-TOKEN: $CICD_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{"serviceName":"telemetryservice","environmentName":"e3"}' \
-            "$VAULT_URL/api/vault/cicd") || {
-              echo "Unable to retrieve environment variables from Vault"
+            response=$(curl -sS --fail-with-body \
+              -X POST \
+              -H "X-CICD-TOKEN: $CICD_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"serviceName":"telemetryservice","environmentName":"e3"}' \
+              "$VAULT_URL/api/vault/cicd") || {
+                echo "Unable to retrieve environment variables from Vault"
+                exit 1
+              }
+
+            if [ -z "$response" ]; then
+              echo "Vault returned an empty environment file"
               exit 1
-            }
+            fi
 
-          if [ -z "$response" ]; then
-            echo "Vault returned an empty environment file"
-            exit 1
+            printf '%s\n' "$response" > telemetryservice.env
+
+            echo "Environment variables written to telemetryservice.env"
           fi
-
-          printf '%s\n' "$response" > telemetryservice.env
-
-          echo "Environment variables written to telemetryservice.env"
-        # Integration function end: Vault
       - name: Deploy & Health Check
         run: |
           set -e
@@ -67,10 +67,8 @@ jobs:
             docker compose down
             exit 1
           fi
-        # Integration function start: Vault
       - name: Cleanup
         if: always()
         run: |
           rm -f telemetryservice.env
           echo "Cleaned up telemetryservice.env"
-        # Integration function end: Vault

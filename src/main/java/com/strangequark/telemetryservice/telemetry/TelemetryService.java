@@ -3,10 +3,11 @@ package com.strangequark.telemetryservice.telemetry;
 import com.strangequark.telemetryservice.event.TelemetryEvent;
 import com.strangequark.telemetryservice.event.TelemetryEventRepository;
 import com.strangequark.telemetryservice.event.TelemetryEventRepositoryImpl;
-import com.strangequark.telemetryservice.utility.JwtUtility; // Integration line: Auth
+import com.strangequark.telemetryservice.utility.JwtUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -23,21 +24,22 @@ public class TelemetryService {
 
     @Autowired
     TelemetryEventRepository telemetryEventRepository;
-    @Autowired // Integration line: Auth
-    JwtUtility jwtUtility; // Integration line: Auth
+    @Value("${authservice.integration}")
+    boolean authserviceIntegration;
+    @Autowired
+    JwtUtility jwtUtility;
 
     public ResponseEntity<?> createEvent(TelemetryEvent telemetryEvent) {
         try {
-            // Integration function start: Auth
             if(telemetryEvent.getServiceName() == null)
                 throw new RuntimeException("Service name must not be null");
-            // Integration function end: Auth
 
             if(telemetryEvent.getEventType() == null)
                 throw new RuntimeException("Event type must not be null");
 
             telemetryEvent.setId(UUID.randomUUID());
-            telemetryEvent.setServiceName(jwtUtility.getServiceName()); // Integration line: Auth
+            if(authserviceIntegration)
+                telemetryEvent.setServiceName(jwtUtility.getServiceName());
             telemetryEvent.setTimestamp(LocalDateTime.now());
             telemetryEventRepository.save(telemetryEvent);
 
