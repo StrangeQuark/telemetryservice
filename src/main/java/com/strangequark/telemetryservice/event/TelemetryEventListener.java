@@ -1,12 +1,13 @@
 package com.strangequark.telemetryservice.event;
 
-import com.strangequark.telemetryservice.utility.JwtUtility; // Integration line: Auth
+import com.strangequark.telemetryservice.utility.JwtUtility;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.header.Header; // Integration line: Auth
+import org.apache.kafka.common.header.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -27,21 +28,32 @@ public class TelemetryEventListener {
 
     @Autowired
     TelemetryEventRepository telemetryEventRepository;
-    // Integration function start: Auth
+    @Value("${authservice.integration}")
+    boolean authserviceIntegration;
+    @Value("${emailservice.integration}")
+    boolean emailserviceIntegration;
+    @Value("${fileservice.integration}")
+    boolean fileserviceIntegration;
+    @Value("${vaultservice.integration}")
+    boolean vaultserviceIntegration;
     @Autowired
     JwtUtility jwtUtility;
-    // Integration function end: Auth
 
     @Bean
     public Collection<NewTopic> kafkaTopics() {
-        return List.of(
-                TopicBuilder.name("general-telemetry-events").partitions(1).replicas(1).build()
-                ,TopicBuilder.name("auth-telemetry-events").partitions(1).replicas(1).build() // Integration line: Auth
-                ,TopicBuilder.name("email-telemetry-events").partitions(1).replicas(1).build() // Integration line: Email
-                ,TopicBuilder.name("file-telemetry-events").partitions(1).replicas(1).build() // Integration line: File
-                ,TopicBuilder.name("vault-telemetry-events").partitions(1).replicas(1).build() // Integration line: Vault
-                ,TopicBuilder.name("react-telemetry-events").partitions(1).replicas(1).build() // Integration line: React
-        );
+        Collection<NewTopic> topics = new ArrayList<>();
+        topics.add(TopicBuilder.name("general-telemetry-events").partitions(1).replicas(1).build());
+
+        if(authserviceIntegration)
+            topics.add(TopicBuilder.name("auth-telemetry-events").partitions(1).replicas(1).build());
+        if(emailserviceIntegration)
+            topics.add(TopicBuilder.name("email-telemetry-events").partitions(1).replicas(1).build());
+        if(fileserviceIntegration)
+            topics.add(TopicBuilder.name("file-telemetry-events").partitions(1).replicas(1).build());
+        if(vaultserviceIntegration)
+            topics.add(TopicBuilder.name("vault-telemetry-events").partitions(1).replicas(1).build());
+
+        return topics;
     }
 
     @Bean
@@ -58,42 +70,26 @@ public class TelemetryEventListener {
         LOGGER.info("General telemetry event received");
         saveTelemetryEvent(record);
     }
-    // Integration function start: Auth
-    @KafkaListener(topics = "auth-telemetry-events", groupId = "telemetry-group")
+    @KafkaListener(topics = "auth-telemetry-events", groupId = "telemetry-group", autoStartup = "${authservice.integration}")
     public void authTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("Auth telemetry event received");
         saveTelemetryEvent(record);
     }
-    // Integration function end: Auth
-    // Integration function start: Email
-    @KafkaListener(topics = "email-telemetry-events", groupId = "telemetry-group")
+    @KafkaListener(topics = "email-telemetry-events", groupId = "telemetry-group", autoStartup = "${emailservice.integration}")
     public void emailTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("Email telemetry event received");
         saveTelemetryEvent(record);
     }
-    // Integration function end: Email
-    // Integration function start: File
-    @KafkaListener(topics = "file-telemetry-events", groupId = "telemetry-group")
+    @KafkaListener(topics = "file-telemetry-events", groupId = "telemetry-group", autoStartup = "${fileservice.integration}")
     public void fileTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("File telemetry event received");
         saveTelemetryEvent(record);
     }
-    // Integration function end: File
-    // Integration function start: Vault
-    @KafkaListener(topics = "vault-telemetry-events", groupId = "telemetry-group")
+    @KafkaListener(topics = "vault-telemetry-events", groupId = "telemetry-group", autoStartup = "${vaultservice.integration}")
     public void vaultTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.info("Vault telemetry event received");
         saveTelemetryEvent(record);
     }
-    // Integration function end: Vault
-    // Integration function start: React
-    @KafkaListener(topics = "react-telemetry-events", groupId = "telemetry-group")
-    public void reactTelemetryEvents(ConsumerRecord<String, TelemetryEvent> record) {
-        LOGGER.info("React telemetry event received");
-        saveTelemetryEvent(record);
-    }
-    // Integration function end: React
-    // Integration function start: Auth
     public String getTokenFromKafkaConsumerRecord(ConsumerRecord<String, TelemetryEvent> record) {
         LOGGER.debug("Getting authorization token from Kafka consumer record");
 
@@ -111,25 +107,25 @@ public class TelemetryEventListener {
 
         LOGGER.debug("Kafka consumer authorization token retrieved");
         return token.substring(7);
-    } // Integration function end: Auth
+    }
 
     private void saveTelemetryEvent(ConsumerRecord<String, TelemetryEvent> record) {
         TelemetryEvent telemetryEvent = record.value();
 
-        // Integration function start: Auth
-        String token = getTokenFromKafkaConsumerRecord(record);
-        if(!jwtUtility.validateToken(token)) {
-            LOGGER.error("Invalid JWT token - telemetry event skipped");
-            return;
-        }
+        if(authserviceIntegration) {
+            String token = getTokenFromKafkaConsumerRecord(record);
+            if(!jwtUtility.validateToken(token)) {
+                LOGGER.error("Invalid JWT token - telemetry event skipped");
+                return;
+            }
 
-        try {
-            telemetryEvent.setServiceName(jwtUtility.getServiceNameFromToken(token));
-        } catch(Exception ex) {
-            LOGGER.error("JWT is not a service account token - telemetry event skipped");
-            return;
+            try {
+                telemetryEvent.setServiceName(jwtUtility.getServiceNameFromToken(token));
+            } catch(Exception ex) {
+                LOGGER.error("JWT is not a service account token - telemetry event skipped");
+                return;
+            }
         }
-        // Integration function end: Auth
 
         telemetryEvent.setId(UUID.randomUUID());
         telemetryEvent.setTimestamp(LocalDateTime.now());

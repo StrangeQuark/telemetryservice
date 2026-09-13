@@ -3,21 +3,22 @@ package com.strangequark.telemetryservice.servicetests;
 import com.strangequark.telemetryservice.event.TelemetryEvent;
 import com.strangequark.telemetryservice.event.TelemetryEventRepository;
 import com.strangequark.telemetryservice.telemetry.TelemetryService;
-import com.strangequark.telemetryservice.utility.JwtUtility; // Integration line: Auth
+import com.strangequark.telemetryservice.utility.JwtUtility;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean; // Integration line: Auth
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.Mockito.when; // Integration line: Auth
+import static org.mockito.Mockito.when;
 
 @DataMongoTest
 @ActiveProfiles("test")
@@ -33,8 +34,8 @@ public class TelemetryServiceTest {
 
     @Autowired
     TelemetryService telemetryService;
-    @MockitoBean // Integration line: Auth
-    JwtUtility jwtUtility; // Integration line: Auth
+    @MockitoBean
+    JwtUtility jwtUtility;
 
     TelemetryEvent testEvent;
     final String testServiceName = "test-service";
@@ -42,6 +43,7 @@ public class TelemetryServiceTest {
 
     @BeforeEach
     void setup() {
+        ReflectionTestUtils.setField(telemetryService, "authserviceIntegration", true);
         testEvent = new TelemetryEvent(testServiceName, testEventType, LocalDateTime.now());
         telemetryEventRepository.save(testEvent);
     }
@@ -57,7 +59,7 @@ public class TelemetryServiceTest {
                 new TelemetryEvent("spoofed-service", "createTestEvent", LocalDateTime.now().minusYears(1));
         UUID suppliedId = telemetryEvent.getId();
 
-        when(jwtUtility.getServiceName()).thenReturn(testServiceName); // Integration line: Auth
+        when(jwtUtility.getServiceName()).thenReturn(testServiceName);
         ResponseEntity<?> response = telemetryService.createEvent(telemetryEvent);
 
         Assertions.assertEquals(200, response.getStatusCode().value());
@@ -65,6 +67,17 @@ public class TelemetryServiceTest {
         Assertions.assertNotEquals(suppliedId, telemetryEvent.getId());
         Assertions.assertEquals(testServiceName, telemetryEvent.getServiceName());
         Assertions.assertTrue(telemetryEvent.getTimestamp().isAfter(LocalDateTime.now().minusMinutes(1)));
+    }
+
+    @Test
+    void createEventWithoutAuthServiceTest() {
+        TelemetryEvent telemetryEvent = new TelemetryEvent(testServiceName, "createTestEvent", LocalDateTime.now());
+
+        ReflectionTestUtils.setField(telemetryService, "authserviceIntegration", false);
+        ResponseEntity<?> response = telemetryService.createEvent(telemetryEvent);
+
+        Assertions.assertEquals(200, response.getStatusCode().value());
+        Assertions.assertEquals(testServiceName, telemetryEvent.getServiceName());
     }
 
     @Test

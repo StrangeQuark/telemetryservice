@@ -5,7 +5,7 @@ import com.strangequark.telemetryservice.event.TelemetryEventRepository;
 import com.strangequark.telemetryservice.event.TelemetryEventRepositoryImpl;
 import com.strangequark.telemetryservice.event.MongoIndexInitializer;
 import com.strangequark.telemetryservice.telemetry.TelemetryService;
-import com.strangequark.telemetryservice.utility.JwtUtility; // Integration line: Auth
+import com.strangequark.telemetryservice.utility.JwtUtility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.IndexInfo;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean; // Integration line: Auth
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.Duration;
@@ -41,8 +41,8 @@ public class TelemetryEventRepositoryImplTest {
 
     @Autowired
     MongoTemplate mongoTemplate;
-    @MockitoBean // Integration line: Auth
-    private JwtUtility jwtUtility; // Integration line: Auth
+    @MockitoBean
+    private JwtUtility jwtUtility;
 
     TelemetryEvent testEvent;
     final String testServiceName = "test-service";
