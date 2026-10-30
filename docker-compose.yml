@@ -17,6 +17,8 @@ services:
     labels:
       com.msinit.log: "true"
       com.msinit.service-name: "telemetryservice"
+    logging:
+      driver: json-file
     depends_on:
       - telemetry-db
       - telemetry-kafka
