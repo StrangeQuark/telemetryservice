@@ -1,5 +1,6 @@
 package com.strangequark.telemetryservice.event;
 
+import io.micrometer.observation.ObservationRegistry;
 import com.strangequark.telemetryservice.utility.JwtUtility;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -57,9 +58,12 @@ public class TelemetryEventListener {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TelemetryEvent> kafkaListenerContainerFactory(ConsumerFactory<String, TelemetryEvent> consumerFactory) {
+    public ConcurrentKafkaListenerContainerFactory<String, TelemetryEvent> kafkaListenerContainerFactory(ConsumerFactory<String, TelemetryEvent> consumerFactory,
+            ObservationRegistry observationRegistry) {
         ConcurrentKafkaListenerContainerFactory<String, TelemetryEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
+        factory.getContainerProperties().setObservationRegistry(observationRegistry);
+        factory.getContainerProperties().setObservationEnabled(true);
         factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(1000L, 2)));
 
         return factory;
